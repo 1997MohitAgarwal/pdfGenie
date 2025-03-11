@@ -75,10 +75,10 @@ export default function PdfReview() {
     
     if (containerWidth < 480) {
       // Mobile devices
-      newScale = 0.8;
+      newScale = 1.6;
     } else if (containerWidth < 768) {
       // Tablets
-      newScale = 1.2;
+      newScale = 1.5;
     }
     
     if (newScale !== scale) {
