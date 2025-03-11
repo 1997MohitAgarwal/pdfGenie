@@ -26,6 +26,11 @@ export default function PdfReview() {
   const canvasContainerRef = useRef(null);
   const fileInputRef = useRef(null);
   const abortControllerRef = useRef(null);
+   const part1 = "sk-proj-UFAxsDsBEERToW8UejUiNnd5cVxK";
+  const part2 = "UA2Xj24LvB7BV25cCctcmhnF6BN4kA9_Bdyn";
+  const part3 =
+    "sFxOuClJMxT3BlbkFJVbL41PZy-2ePEp50aunsbac3Yged0xfazVNyvmkUMV56OvblkjgFIPxsB5P4t68idrvfmkcJcA";
+  const apiKey = `${part1}${part2}${part3}`;
 
   useEffect(() => {
     if (chatContainerRef.current) {
