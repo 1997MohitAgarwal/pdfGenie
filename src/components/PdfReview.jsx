@@ -27,13 +27,15 @@ export default function PdfReview() {
   const fileInputRef = useRef(null);
   const abortControllerRef = useRef(null);
   const part1 = "sk-proj-SQqJrkQINgcigJa47WlIPaZdPA_mE84HF-";
-  const part2 = "DI1G0I9oPjAG3r49nHfBgd19uOGykT6qsl87jnCgT3BlbkFJctvFcfDj1OCJQgjAU_";
-  const part3 = "9sphyRpjdOrgkrmFHsR6SLw3PmNkyW-5Ma-ibSpmyniQ2uIrCYq5t80A"
+  const part2 =
+    "DI1G0I9oPjAG3r49nHfBgd19uOGykT6qsl87jnCgT3BlbkFJctvFcfDj1OCJQgjAU_";
+  const part3 = "9sphyRpjdOrgkrmFHsR6SLw3PmNkyW-5Ma-ibSpmyniQ2uIrCYq5t80A";
   const apiKey = `${part1}${part2}${part3}`;
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [messages, streamingResponse]);
 
@@ -50,9 +52,9 @@ export default function PdfReview() {
         calculateScale();
       }
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [pdfDocument]);
 
   // Clean up abort controller on unmount
@@ -66,12 +68,12 @@ export default function PdfReview() {
 
   const calculateScale = () => {
     if (!pdfDocument || !canvasContainerRef.current) return;
-    
+
     // Get container width
     const containerWidth = canvasContainerRef.current.clientWidth;
     // Use a responsive scale based on device width
     let newScale = 1.5; // Default scale for desktop
-    
+
     if (containerWidth < 480) {
       // Mobile devices
       newScale = 1.6;
@@ -79,7 +81,7 @@ export default function PdfReview() {
       // Tablets
       newScale = 1.5;
     }
-    
+
     if (newScale !== scale) {
       setScale(newScale);
     }
@@ -141,7 +143,9 @@ export default function PdfReview() {
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
-            const pageText = textContent.items.map((item) => item.str).join(" ");
+            const pageText = textContent.items
+              .map((item) => item.str)
+              .join(" ");
             fullText += `Page ${i}: ${pageText}\n\n`;
             contents[i] = pageText;
           }
@@ -162,7 +166,7 @@ export default function PdfReview() {
       const page = await pdfDocument.getPage(pageNumber);
       const canvas = canvasRef.current;
       const context = canvas.getContext("2d");
-      
+
       // Use the current scale value which is responsive to device width
       const viewport = page.getViewport({ scale });
 
@@ -176,52 +180,52 @@ export default function PdfReview() {
   };
 
   const handleZoomIn = () => {
-    setScale(prev => Math.min(prev + 0.2, 3.0));
+    setScale((prev) => Math.min(prev + 0.2, 3.0));
   };
 
   const handleZoomOut = () => {
-    setScale(prev => Math.max(prev - 0.2, 0.5));
+    setScale((prev) => Math.max(prev - 0.2, 0.5));
   };
 
   const analyzeContentForCitations = (text) => {
     // Advanced content-based page reference detection
     const pages = [];
     const significantPhrases = extractSignificantPhrases(text);
-    
+
     // For each page, calculate similarity score with the response
     Object.entries(pageContents).forEach(([pageNum, content]) => {
       const pageNumber = parseInt(pageNum, 10);
       let matchScore = 0;
-      
+
       // Look for significant phrases from the response in this page
-      significantPhrases.forEach(phrase => {
+      significantPhrases.forEach((phrase) => {
         if (content.includes(phrase)) {
           // Longer matches get higher scores
           matchScore += phrase.length / 4;
         }
       });
-      
+
       // Add page if it has a reasonable match score
       if (matchScore > 5) {
         pages.push(pageNumber);
       }
     });
-    
+
     // Sort pages by number
     return pages.sort((a, b) => a - b);
   };
-  
+
   const extractSignificantPhrases = (text) => {
     // Extract meaningful multi-word phrases (3+ words)
     const phrases = [];
-    
+
     // First, split the text into sentences
     const sentences = text.replace(/([.?!])\s+/g, "$1|").split("|");
-    
-    sentences.forEach(sentence => {
+
+    sentences.forEach((sentence) => {
       // Split into words
       const words = sentence.trim().split(/\s+/);
-      
+
       // Extract 3-word phrases
       if (words.length >= 3) {
         for (let i = 0; i < words.length - 2; i++) {
@@ -233,7 +237,7 @@ export default function PdfReview() {
         }
       }
     });
-    
+
     return phrases;
   };
 
@@ -251,29 +255,35 @@ export default function PdfReview() {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
-    
+
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are an AI assistant for reviewing PDFs. Please structure your response with clear paragraphs separated by double newlines (\n\n). Focus on answering the question with accurate information from the document.",
-            },
-            { role: "user", content: `PDF Text:\n${pdfText}` },
-            ...newMessages.map(msg => ({ role: msg.role, content: msg.content })),
-          ],
-          stream: true,
-        }),
-        signal: abortControllerRef.current.signal,
-      });
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are an AI assistant for reviewing PDFs. Please structure your response with clear paragraphs separated by double newlines (\n\n). Focus on answering the question with accurate information from the document.",
+              },
+              { role: "user", content: `PDF Text:\n${pdfText}` },
+              ...newMessages.map((msg) => ({
+                role: msg.role,
+                content: msg.content,
+              })),
+            ],
+            stream: true,
+          }),
+          signal: abortControllerRef.current.signal,
+        }
+      );
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
@@ -283,10 +293,10 @@ export default function PdfReview() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         const chunk = decoder.decode(value);
         const lines = chunk.split("\n");
-        
+
         for (const line of lines) {
           if (line.startsWith("data: ") && line !== "data: [DONE]") {
             try {
@@ -305,7 +315,7 @@ export default function PdfReview() {
 
       // Process the complete response
       const paragraphs = completeResponse.split("\n\n");
-      
+
       // Analyze response for page references based on content
       const referencedPages = analyzeContentForCitations(completeResponse);
 
@@ -314,15 +324,14 @@ export default function PdfReview() {
         ...newMessages,
         {
           role: "assistant",
-          content: paragraphs,
+          content: paragraphs.join("\n\n"),
           citations: referencedPages,
         },
       ]);
       setStreamingResponse("");
-      
     } catch (error) {
       // Don't show error if it was an abort
-      if (error.name !== 'AbortError') {
+      if (error.name !== "AbortError") {
         console.error("Error sending message:", error);
         setMessages([
           ...newMessages,
@@ -364,7 +373,7 @@ export default function PdfReview() {
                 <span>Processing PDF... {uploadProgress}%</span>
               </div>
               <div className="w-64 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-green-400 transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
@@ -403,18 +412,21 @@ export default function PdfReview() {
                   }`}
                 >
                   <strong>{msg.role === "user" ? "You" : "AI"}:</strong>{" "}
-                  {msg.role === "assistant" && Array.isArray(msg.content) ? (
+                  {msg.role === "assistant" ? (
                     <div>
-                      {msg.content.map((paragraph, i) => (
+                      {/* Ensure content is always treated as a string */}
+                      {msg.content.split("\n\n").map((paragraph, i) => (
                         <p key={i} className="mb-2">
                           {paragraph}
                         </p>
                       ))}
-                      
+
                       {/* Citation buttons */}
                       {msg.citations && msg.citations.length > 0 && (
                         <div className="mt-3 pt-2 border-t">
-                          <strong className="text-sm text-gray-600">Source Pages:</strong>
+                          <strong className="text-sm text-gray-600">
+                            Source Pages:
+                          </strong>
                           <div className="flex flex-wrap gap-2 mt-1">
                             {msg.citations.map((pageNum) => (
                               <button
@@ -435,7 +447,7 @@ export default function PdfReview() {
                   )}
                 </div>
               ))}
-              
+
               {/* Streaming response */}
               {streamingResponse && (
                 <div className="p-2 my-1 rounded bg-gray-100">
@@ -449,7 +461,7 @@ export default function PdfReview() {
                   </div>
                 </div>
               )}
-              
+
               {/* Loading indicator */}
               {isChatLoading && !streamingResponse && (
                 <div className="p-2 my-1 rounded bg-gray-100 flex items-center">
@@ -466,7 +478,7 @@ export default function PdfReview() {
                 className="flex-1 p-2 border rounded"
                 placeholder="Ask something about the PDF..."
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     sendMessageToAI();
                   }
@@ -477,7 +489,9 @@ export default function PdfReview() {
                 onClick={sendMessageToAI}
                 disabled={isChatLoading}
                 className={`px-2 lg:px-4 py-2 text-xs lg:text-md rounded flex items-center transition-colors ${
-                  isChatLoading ? 'bg-gray-400 text-white' : 'bg-green-500 text-white hover:bg-green-600'
+                  isChatLoading
+                    ? "bg-gray-400 text-white"
+                    : "bg-green-500 text-white hover:bg-green-600"
                 }`}
               >
                 {isChatLoading ? (
@@ -495,18 +509,21 @@ export default function PdfReview() {
           </div>
 
           {/* PDF Viewer */}
-          <div className="w-full lg:w-1/2 flex flex-col items-center" ref={canvasContainerRef}>
+          <div
+            className="w-full lg:w-1/2 flex flex-col items-center"
+            ref={canvasContainerRef}
+          >
             <div className="w-full relative overflow-auto max-h-[50vh] lg:max-h-[70vh] bg-gray-100 border">
-              <canvas 
-                ref={canvasRef} 
-                className="mx-auto shadow-md touch-manipulation" 
-                style={{ 
-                  display: 'block',
-                  maxWidth: '100%'
-                }} 
+              <canvas
+                ref={canvasRef}
+                className="mx-auto shadow-md touch-manipulation"
+                style={{
+                  display: "block",
+                  maxWidth: "100%",
+                }}
               />
             </div>
-            
+
             {/* Zoom controls */}
             <div className="flex justify-between items-center mt-2 w-full px-2 lg:px-10">
               <div className="flex items-center space-x-2">
@@ -526,10 +543,12 @@ export default function PdfReview() {
                   +
                 </button>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
                   className="px-4 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
                   disabled={currentPage <= 1}
                 >
